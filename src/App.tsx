@@ -62,48 +62,68 @@ export default function App() {
     setTranscript
   } = useSpeechToText();
 
+  const [initialDocId] = useState(() => Date.now().toString());
+
   // Dynamic state-managed list of documents
   const [documents, setDocuments] = useState<DocumentItem[]>(() => {
     const saved = localStorage.getItem('transcribe_docs');
+    let docsList: DocumentItem[] = [];
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved) as DocumentItem[];
+        // Filter out empty "Rekaman Baru" documents from previous sessions to prevent clutter
+        docsList = parsed.filter(doc => !(doc.title.startsWith('Rekaman Baru') && doc.content.trim() === ''));
       } catch (e) {
         console.error('Error parsing saved docs:', e);
       }
     }
-    return [
-      {
-        id: '1',
-        title: 'Notulensi Rapat Produk',
-        content: 'Selamat pagi semua. Hari ini kita akan membahas perkembangan pengembangan fitur transkripsi suara secara realtime. Kita perlu memastikan performa transkripsi tetap responsif, terutama untuk bahasa Indonesia dan Inggris. Tim desain juga menyarankan agar antarmuka memiliki tema gelap yang elegan dan kontras.',
-        createdAt: '12 Menit Lalu',
-        size: '1.2 KB',
-        duration: 45,
-        lang: 'id-ID'
-      },
-      {
-        id: '2',
-        title: 'Wawancara User Research',
-        content: 'Hasil wawancara dengan beberapa pengguna menunjukkan bahwa mereka sangat membutuhkan fitur untuk beralih bahasa dengan cepat selama proses perekaman. Mereka juga menginginkan ekspor dokumen ke format .docx agar mudah dibagikan kepada tim.',
-        createdAt: 'Kemarin',
-        size: '2.4 KB',
-        duration: 120,
-        lang: 'id-ID'
-      },
-      {
-        id: '3',
-        title: 'Briefing Kreatif April',
-        content: 'Tujuan kampanye bulan April ini adalah menonjolkan kemudahan penggunaan aplikasi TranscribePro. Kita akan fokus pada visualisasi audio realtime yang dinamis serta akurasi tinggi yang didukung oleh teknologi pengenalan suara canggih.',
-        createdAt: '3 Hari Lalu',
-        size: '850 B',
-        duration: 35,
-        lang: 'id-ID'
-      }
-    ];
+    if (docsList.length === 0) {
+      docsList = [
+        {
+          id: '1',
+          title: 'Notulensi Rapat Produk',
+          content: 'Selamat pagi semua. Hari ini kita akan membahas perkembangan pengembangan fitur transkripsi suara secara realtime. Kita perlu memastikan performa transkripsi tetap responsif, terutama untuk bahasa Indonesia dan Inggris. Tim desain juga menyarankan agar antarmuka memiliki tema gelap yang elegan dan kontras.',
+          createdAt: '12 Menit Lalu',
+          size: '1.2 KB',
+          duration: 45,
+          lang: 'id-ID'
+        },
+        {
+          id: '2',
+          title: 'Wawancara User Research',
+          content: 'Hasil wawancara dengan beberapa pengguna menunjukkan bahwa mereka sangat membutuhkan fitur untuk beralih bahasa dengan cepat selama proses perekaman. Mereka juga menginginkan ekspor dokumen ke format .docx agar mudah dibagikan kepada tim.',
+          createdAt: 'Kemarin',
+          size: '2.4 KB',
+          duration: 120,
+          lang: 'id-ID'
+        },
+        {
+          id: '3',
+          title: 'Briefing Kreatif April',
+          content: 'Tujuan kampanye bulan April ini adalah menonjolkan kemudahan penggunaan aplikasi TranscribePro. Kita akan fokus pada visualisasi audio realtime yang dinamis serta akurasi tinggi yang didukung oleh teknologi pengenalan suara canggih.',
+          createdAt: '3 Hari Lalu',
+          size: '850 B',
+          duration: 35,
+          lang: 'id-ID'
+        }
+      ];
+    }
+
+    // Always start a new session with a blank "Rekaman Baru"
+    const newDoc: DocumentItem = {
+      id: initialDocId,
+      title: 'Rekaman Baru',
+      content: '',
+      createdAt: 'Baru Saja',
+      size: '0 B',
+      duration: 0,
+      lang: 'id-ID'
+    };
+
+    return [newDoc, ...docsList];
   });
 
-  const [selectedDocId, setSelectedDocId] = useState<string>('1');
+  const [selectedDocId, setSelectedDocId] = useState<string>(initialDocId);
   const [editableText, setEditableText] = useState('');
   const [isCopied, setIsCopied] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
