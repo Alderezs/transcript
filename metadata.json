@@ -1,0 +1,6 @@
+{
+  "name": "SuaraTeks",
+  "description": "A modern, responsive voice-to-text transcriber with professional DOCX export features.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["speech_to_text", "document_export"]
+}
